@@ -1,0 +1,959 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Asisten Laporan Akademik</title>
+</head>
+<body>
+<style>
+/* Tata letak: satu kolom kerja dengan tab; kartu hanya untuk blok kerja yang berdiri sendiri. */
+:root{--bg:#f6f7f9;--card:#fff;--tx:#1d2330;--mut:#667085;--bd:#dfe3ea;--ac:#2f5bea;--acx:#fff;--ok:#1a9a5b;--wn:#d98a00;--bad:#d23c3c;--delbg:rgba(210,60,60,.2);--insbg:rgba(26,154,91,.24)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.w{max-width:980px;margin:0 auto;padding-block:18px 60px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1{font-size:22px;margin:4px 0 2px}.sub{color:var(--mut);margin:0 0 14px}
+.app{display:grid;grid-template-columns:188px minmax(0,1fr);gap:18px;align-items:start}
+.tabs{display:flex;flex-direction:column;gap:6px;position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px)}
+.tab{text-align:left;padding:10px 12px;border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:10px;cursor:pointer;font:inherit;white-space:nowrap}
+.tab.on{background:var(--ac);color:var(--acx);border-color:var(--ac)}
+.main{min-width:0}
+@media (max-width:760px){.app{grid-template-columns:minmax(0,1fr);gap:0}.tabs{flex-direction:row;position:static;overflow-x:auto;margin-bottom:12px}.tab{flex:0 0 auto}}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-bottom:12px}
+.tile{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px 14px;min-width:0}
+.tile .l{color:var(--mut);font-size:12px;text-transform:uppercase;letter-spacing:.05em}
+.tile .n{font-size:30px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.25}
+.tile .s{color:var(--mut);font-size:13px;overflow-wrap:anywhere}
+.steps{display:grid;gap:8px;margin-top:10px}
+.step{display:flex;gap:12px;align-items:center;border:1px solid var(--bd);border-radius:10px;padding:10px 12px}
+.step>div{flex:1;min-width:0}
+.step .d{width:22px;height:22px;border-radius:50%;border:2px solid var(--bd);flex:none;display:grid;place-items:center;font-size:12px;font-weight:700}
+.step.done .d{background:var(--ok);border-color:var(--ok);color:#fff}
+.step small{display:block;color:var(--mut);font-size:13px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px;margin-bottom:12px;min-width:0}
+textarea,select,input[type=text]{width:100%;background:var(--bg);color:var(--tx);border:1px solid var(--bd);border-radius:8px;padding:10px;font:inherit}
+textarea{min-height:200px;resize:vertical}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:10px 0 0}
+.row>*{flex:0 1 auto;min-width:0}.row select{width:auto;flex:1;min-width:130px}
+button.b{background:var(--ac);color:var(--acx);border:0;border-radius:8px;padding:9px 14px;font:inherit;cursor:pointer}
+button.g{background:transparent;color:var(--tx);border:1px solid var(--bd);border-radius:8px;padding:8px 12px;font:inherit;cursor:pointer}
+button:focus-visible,.drop:focus-visible,summary:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+button:disabled{opacity:.5;cursor:default}
+.drop{border:2px dashed var(--bd);border-radius:12px;padding:22px;text-align:center;color:var(--mut);cursor:pointer}
+.drop:hover{border-color:var(--ac)}
+.hid,[hidden]{display:none!important}.mut{color:var(--mut);font-size:13px}
+.big{font-size:34px;font-weight:700}
+.bar{height:8px;background:var(--bd);border-radius:6px;overflow:hidden;margin:6px 0}.bar i{display:block;height:100%}
+.p{border-top:1px solid var(--bd);padding:10px 0}.p:first-child{border-top:0}
+.p .t{font-size:14px;max-height:4.6em;overflow:hidden;overflow-wrap:anywhere}.p .t.open{max-height:none}
+.p .t mark{background:rgba(217,138,0,.3);color:inherit;border-radius:3px}
+details.card summary{cursor:pointer;font-weight:600}
+.tag{font-size:12px;padding:2px 8px;border-radius:99px;border:1px solid currentColor}
+.note{font-size:12.5px;color:var(--mut);border-left:3px solid var(--wn);padding:4px 10px;margin-top:10px}
+.chk{display:inline-flex;gap:6px;align-items:center;margin:8px 16px 0 0;font-size:14px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:640px){.grid2{grid-template-columns:1fr}}
+.cell{min-width:0;overflow-wrap:anywhere;font-size:14px;padding:8px 0;border-top:1px solid var(--bd)}
+del{background:var(--delbg);text-decoration:none;color:inherit;border-radius:3px}
+ins{background:var(--insbg);text-decoration:none;color:inherit;border-radius:3px}
+.scroll{overflow-x:auto}
+table.t{width:100%;border-collapse:collapse;font-size:13.5px;font-variant-numeric:tabular-nums}
+table.t th,table.t td{padding:6px 8px;border-top:1px solid var(--bd);text-align:left;vertical-align:top}
+table.t th{color:var(--mut);font-weight:600;border-top:0}
+.kpi{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+.kpi>div{flex:1;min-width:120px;border:1px solid var(--bd);border-radius:10px;padding:8px 10px}
+.kpi b{display:block;font-size:22px;font-variant-numeric:tabular-nums}
+.strip{position:relative;height:26px;border-bottom:1px solid var(--bd);margin:4px 0 12px}
+.strip i{position:absolute;top:9px;width:9px;height:9px;border-radius:50%;margin-left:-4px;opacity:.85}
+.item{border-top:1px solid var(--bd);padding:8px 0;font-size:14px;overflow-wrap:anywhere}.item:first-child{border-top:0}
+.item a{color:var(--ac)}
+
+/* ===== Tampilan dashboard terang ===== */
+:root{color-scheme:light;--bg:#f4f6fa;--card:#fff;--tx:#1f2937;--mut:#6b7280;--bd:#e5e7eb;--ac:#2563eb;--acx:#fff;--soft:#eff4ff;--sh:0 1px 2px rgba(16,24,40,.05)}
+body{background:var(--bg)}
+.side{position:fixed;inset:0 auto 0 0;width:232px;background:#fff;border-right:1px solid var(--bd);display:flex;flex-direction:column;padding:16px 12px;z-index:5;overflow-y:auto}
+.brand{display:flex;gap:10px;align-items:center;font-weight:700;font-size:15px;padding:4px 8px 16px}
+.brand i{font-style:normal;width:34px;height:34px;border-radius:10px;background:var(--ac);color:#fff;display:grid;place-items:center}
+.side .cap{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);padding:8px 10px 4px}
+.tabs{position:static;display:flex;flex-direction:column;gap:2px}
+.tab{border:0;background:transparent;color:#374151;padding:9px 10px;border-radius:8px}
+.tab:hover{background:#f3f4f6}
+.tab.on{background:var(--soft);color:var(--ac);font-weight:600}
+.shell{margin-left:232px;min-height:100vh}
+.top{position:sticky;top:0;z-index:4;background:rgba(255,255,255,.92);backdrop-filter:blur(6px);border-bottom:1px solid var(--bd);padding:14px 28px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.top h1{font-size:20px;margin:0}.top .sub{margin:0;font-size:13px}
+.pg{padding:22px 28px 60px;max-width:1180px}
+.card,.tile{box-shadow:var(--sh);border-radius:12px}
+.tile .n{color:var(--ac)}
+textarea,select,input[type=text]{background:#fff}
+textarea:focus,select:focus,input:focus{outline:2px solid #bfdbfe;border-color:var(--ac)}
+button.b{background:var(--ac);color:#fff;font-weight:500}button.b:hover{background:#1d4ed8}
+button.g{background:#fff}button.g:hover{background:#f9fafb}
+button.dng{color:#b91c1c;border-color:#fecaca}button.dng:hover{background:#fef2f2}
+table.t th{background:#f9fafb;font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+table.t tbody tr:hover{background:#fafbff}
+.act{display:flex;gap:6px;justify-content:flex-end;white-space:nowrap}.act button{padding:4px 10px;font-size:13px}
+.hd{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap}
+dialog{border:0;border-radius:14px;padding:18px;width:min(560px,92vw);box-shadow:0 20px 50px rgba(16,24,40,.25);color:var(--tx)}
+dialog::backdrop{background:rgba(17,24,39,.35)}
+dialog label{display:block;font-size:13px;color:var(--mut);margin:10px 0 4px}
+.menu{display:none}
+@media (max-width:860px){
+ .side{position:static;width:auto;flex-direction:row;align-items:center;overflow-x:auto;padding:8px;border-right:0;border-bottom:1px solid var(--bd)}
+ .brand,.side .cap{display:none}.tabs{flex-direction:row}.tab{white-space:nowrap}
+ .shell{margin-left:0}.top,.pg{padding-left:14px;padding-right:14px}
+}
+</style>
+
+<aside class="side">
+<div class="brand"><i>📚</i><span>Asisten Laporan</span></div>
+<div class="cap">Menu</div>
+<nav class="tabs" aria-label="Menu">
+<button class="tab on" data-t="home">🏠 Beranda</button>
+<button class="tab" data-t="doc">📄 Dokumen</button>
+<button class="tab" data-t="det">🔍 Detektor AI</button>
+<button class="tab" data-t="par">✍️ Parafrase</button>
+<button class="tab" data-t="cit">📑 Sitasi</button>
+<button class="tab" data-t="cmp">🔀 Bandingkan</button>
+<button class="tab" data-t="ben">🎯 Uji Akurasi</button>
+<button class="tab" data-t="set">⚙️ Pengaturan</button>
+</nav>
+</aside>
+<div class="shell">
+<header class="top"><div><h1 id="pgT">Beranda</h1><p class="sub">Cek, perbaiki, dan rapikan laporan Anda di satu tempat.</p></div></header>
+<div class="pg">
+<main class="main">
+
+<section id="home">
+<div class="tiles">
+<div class="tile"><div class="l">Dokumen</div><div class="n" id="kWords">0</div><div class="s" id="kParas">belum ada dokumen</div></div>
+<div class="tile"><div class="l">Skor AI terakhir</div><div class="n" id="kAi">–</div><div class="s" id="kAiS">belum dicek</div></div>
+<div class="tile"><div class="l">Masalah sitasi</div><div class="n" id="kCit">–</div><div class="s" id="kCitS">belum diperiksa</div></div>
+<div class="tile"><div class="l">Perubahan skor</div><div class="n" id="kHist">–</div><div class="s" id="kHistS">belum ada riwayat</div></div>
+</div>
+<div class="card">
+<b>Langkah kerja</b>
+<div class="steps">
+<div class="step" id="st1"><span class="d">1</span><div>Muat dokumen<small>Unggah PDF atau foto scan, atau tempel teks.</small></div><button class="b" data-go="doc">Buka</button></div>
+<div class="step" id="st2"><span class="d">2</span><div>Cek indikasi AI<small>Skor per paragraf dengan penanda frasa yang terdengar generik.</small></div><button class="g" data-go="det">Buka</button></div>
+<div class="step" id="st3"><span class="d">3</span><div>Parafrase bagian yang tinggi<small>Satu paragraf atau seluruh dokumen.</small></div><button class="g" data-go="par">Buka</button></div>
+<div class="step" id="st4"><span class="d">4</span><div>Periksa sitasi<small>Kecocokan teks dengan daftar pustaka dan format dasar.</small></div><button class="g" data-go="cit">Buka</button></div>
+<div class="step" id="st5"><span class="d">5</span><div>Bandingkan versi<small>Lihat apa yang berubah dan seberapa turun skornya.</small></div><button class="g" data-go="cmp">Buka</button></div>
+</div>
+</div>
+<div class="mut" id="homeSrv"></div>
+<div class="card" id="crudc">
+<div class="hd"><b>Daftar Dokumen</b><button class="b" id="dAdd">+ Tambah dokumen</button></div>
+<div class="scroll"><table class="t"><thead><tr><th>Judul</th><th>Kata</th><th>Diubah</th><th></th></tr></thead><tbody id="dBody"></tbody></table></div>
+<div class="mut" id="dEmpty">Belum ada dokumen. Tersimpan hanya di browser ini (localStorage), tidak dikirim ke mana pun.</div>
+</div>
+<dialog id="dDlg"><form method="dialog" id="dForm">
+<b id="dDT">Tambah dokumen</b>
+<label for="dTi">Judul</label><input type="text" id="dTi" placeholder="mis. Laporan Praktikum 3">
+<label for="dTx">Isi teks</label><textarea id="dTx" style="min-height:220px"></textarea>
+<div class="row" style="justify-content:flex-end"><button type="button" class="g" id="dCancel">Batal</button><button type="button" class="b" id="dSave">Simpan</button></div>
+</form></dialog>
+
+</section>
+
+<section id="doc" class="hid">
+<div class="card">
+<div class="drop" id="drop" tabindex="0" role="button">📄 Klik atau seret file PDF atau foto scan ke sini<div class="mut" id="finfo">Teks diproses di browser Anda. Halaman scan dibaca dengan OCR.</div></div>
+<input type="file" id="file" accept="application/pdf,image/*" class="hid">
+<label class="chk"><input type="checkbox" id="oOcr" checked> Baca halaman scan dengan OCR (dikerjakan Claude)</label>
+</div>
+<details class="card">
+<summary>Pengaturan: bagian yang dinilai</summary>
+<div><label class="chk"><input type="checkbox" id="oRefs" checked> Abaikan Daftar Pustaka</label><label class="chk"><input type="checkbox" id="oTab" checked> Abaikan tabel dan data angka</label><label class="chk"><input type="checkbox" id="oQuo" checked> Abaikan kutipan langsung</label></div>
+</details>
+<div class="mut" id="osum" style="margin:-4px 0 12px"></div>
+<div class="card">
+<b>Teks dokumen</b> <span class="mut">(bisa diedit / ditempel manual; judul "Daftar Pustaka" dikenali otomatis)</span>
+<textarea id="txt" placeholder="Hasil bacaan PDF muncul di sini, atau tempel teks Anda..."></textarea>
+<div class="row"><span class="mut" id="cnt">0 kata</span><button class="b" id="toDet">Analisis dengan Detektor AI →</button><button class="g" id="toCit">Periksa sitasi →</button><button class="g" id="dKeep">💾 Simpan ke Daftar Dokumen</button></div>
+</div>
+</section>
+
+<section id="det" class="hid">
+<div class="card">
+<div class="row" style="margin:0"><button class="b" id="runDet">Jalankan deteksi</button><button class="g" id="dcancel" hidden>Batalkan</button><button class="g" id="pdfD" disabled>Unduh PDF</button><button class="g" id="docD" disabled>Unduh Word</button><button class="g" id="parAllD">Parafrase semua →</button></div>
+<div class="mut" id="dstat" style="margin-top:8px">Gabungan analisis statistik lokal + penilaian AI per paragraf. Dokumen panjang diproses bertahap.</div>
+<div id="dprog" hidden><div class="bar"><i id="dpbar" style="width:0;background:var(--ac)"></i></div></div>
+<div class="row"><span class="mut" id="srv">Server perantara: tidak terhubung (opsional, lihat README)</span><label class="chk" style="margin:0"><input type="checkbox" id="useExt" checked> pakai detektor eksternal bila ada</label></div>
+<div id="dsum" class="hid" style="margin-top:12px"><div class="mut">Perkiraan kemungkinan teks AI (keseluruhan)</div><div class="big" id="dscore">–</div><div class="bar"><i id="dbar"></i></div></div>
+</div>
+<details class="card"><summary>🎯 Kalibrasi akurasi (disarankan)</summary>
+<p class="mut">Tempel satu teks yang Anda tahu ditulis manusia (mis. tulisan lama Anda) dan satu teks hasil AI, masing-masing min. 60 kata. Detektor akan menyesuaikan skalanya. Untuk kalibrasi dengan banyak contoh, pakai tab Uji Akurasi.</p>
+<textarea id="calH" style="min-height:90px" placeholder="Teks MANUSIA..."></textarea>
+<textarea id="calA" style="min-height:90px;margin-top:8px" placeholder="Teks AI..."></textarea>
+<div class="row"><button class="b" id="calBtn">Kalibrasi</button><button class="g" id="calReset">Reset</button><span class="mut" id="calS"></span></div></details>
+<div class="card hid" id="dlistc"><div id="dlist"></div></div>
+<div class="note">Detektor AI bersifat probabilistik dan bisa keliru, termasuk pada tulisan manusia yang formal. Gunakan sebagai petunjuk revisi, bukan bukti. Tetap tulis dengan gagasan sendiri dan cantumkan sitasi.</div>
+</section>
+
+<section id="par" class="hid">
+<div class="card">
+<b>Teks asli</b>
+<textarea id="pin" placeholder="Tempel paragraf yang ingin diparafrase..."></textarea>
+<div class="row">
+<select id="mode"><option value="akademik">Gaya akademik formal</option><option value="sederhana">Lebih sederhana &amp; jelas</option><option value="ringkas">Lebih ringkas</option><option value="natural">Lebih natural (gaya manusia)</option></select>
+<select id="lang"><option value="Bahasa Indonesia">Bahasa Indonesia</option><option value="English">English</option></select>
+<button class="g" id="runPar">Parafrase teks ini</button><button class="b" id="runAll">⚡ Parafrase SEMUA dokumen</button>
+</div>
+<div class="mut" style="margin-top:6px">Parafrase semua melewati daftar pustaka, serta tabel dan kutipan langsung bila opsinya aktif di tab Dokumen.</div>
+</div>
+<div class="card">
+<b>Hasil parafrase</b>
+<textarea id="pout" placeholder="Hasil muncul di sini..."></textarea>
+<div class="row"><button class="g" id="cp">Salin</button><button class="g" id="dl">Unduh .txt</button><button class="b" id="pdfP">Unduh PDF</button><button class="g" id="docP">Unduh Word</button><button class="g" id="toCmp">Bandingkan dengan asli →</button><button class="g" id="back">Cek ulang di Detektor</button></div>
+<div class="mut" id="pstat" style="margin-top:8px"></div>
+</div>
+<div class="note">Parafrase tidak menggantikan sitasi. Teks yang diparafrase dari sumber lain tetap harus dicantumkan referensinya, dan periksa kembali makna serta fakta hasilnya.</div>
+</section>
+
+<section id="cit" class="hid">
+<div class="card">
+<b>Pemeriksa sitasi dan daftar pustaka</b>
+<p class="mut" style="margin:4px 0 0">Mencocokkan sitasi di teks dengan daftar pustaka, memeriksa format dasar APA atau IEEE, dan (bila server terhubung) memvalidasi referensi lewat Crossref. Memakai teks dari tab Dokumen.</p>
+<div class="row"><select id="cstyle"><option value="auto">Gaya sitasi: otomatis</option><option value="apa">APA (Nama, 2020)</option><option value="ieee">IEEE [1]</option></select><button class="b" id="runCit">Periksa sitasi</button><button class="g" id="runCr">Validasi di Crossref</button></div>
+<div class="mut" id="cstat" style="margin-top:8px"></div>
+</div>
+<div id="cres"></div>
+</section>
+
+<section id="cmp" class="hid">
+<div class="card">
+<b>Pembanding versi</b>
+<div class="grid2" style="margin-top:8px">
+<div><div class="mut">Versi asli</div><textarea id="cA" style="min-height:140px" placeholder="Teks sebelum revisi..."></textarea></div>
+<div><div class="mut">Versi revisi</div><textarea id="cB" style="min-height:140px" placeholder="Teks sesudah revisi..."></textarea></div>
+</div>
+<div class="row"><button class="b" id="runCmp">Bandingkan</button><button class="g" id="cFromDoc">Isi asli dari tab Dokumen</button><button class="g" id="cFromPar">Isi revisi dari hasil parafrase</button></div>
+<div class="mut" id="cmpS" style="margin-top:8px"></div>
+</div>
+<div class="card hid" id="cmpc"><div id="cmpk" class="kpi"></div><div class="grid2" style="margin-top:12px"><b>Asli</b><b>Revisi</b></div><div id="cmpd"></div></div>
+<div class="card">
+<b>Riwayat skor sebelum dan sesudah revisi</b>
+<div class="row"><input type="text" id="hlabel" placeholder="Label untuk deteksi berikutnya, mis. Draf 2" style="flex:1;min-width:200px"><button class="g" id="hclear">Hapus riwayat</button></div>
+<div class="scroll" style="margin-top:8px"><table class="t"><thead><tr><th>Waktu</th><th>Label</th><th>Kata</th><th>Skor AI</th><th>Selisih</th></tr></thead><tbody id="hbody"></tbody></table></div>
+<div class="mut" id="hempty">Belum ada riwayat. Setiap kali deteksi selesai, skornya tercatat di sini (hanya angka, bukan isi dokumen).</div>
+</div>
+</section>
+
+<section id="ben" class="hid">
+<div class="card">
+<b>Uji tolok ukur sendiri</b>
+<p class="mut" style="margin:4px 0 0">Tempel 20 sampai 30 teks tulisan manusia dan teks AI berbahasa Indonesia, masing-masing minimal 40 kata. Pisahkan antar teks dengan baris berisi <code>---</code>. Hasilnya menunjukkan angka kesalahan di tiap ambang dan bisa dipakai untuk menyetel kalibrasi.</p>
+<div class="grid2" style="margin-top:8px">
+<div><div class="mut">Teks MANUSIA (<span id="nH">0</span> teks)</div><textarea id="bH" style="min-height:160px" placeholder="Teks manusia 1&#10;---&#10;Teks manusia 2"></textarea></div>
+<div><div class="mut">Teks AI (<span id="nA">0</span> teks)</div><textarea id="bA" style="min-height:160px" placeholder="Teks AI 1&#10;---&#10;Teks AI 2"></textarea></div>
+</div>
+<div class="row"><button class="b" id="runBen">Jalankan uji</button><button class="g" id="benCancel" hidden>Batalkan</button><label class="chk" style="margin:0"><input type="checkbox" id="benAI" checked> sertakan penilaian AI (lebih lambat)</label></div>
+<div id="benp" hidden><div class="bar"><i id="benbar" style="width:0;background:var(--ac)"></i></div></div>
+<div class="mut" id="benS" style="margin-top:8px"></div>
+</div>
+<div class="card hid" id="benc">
+<div class="kpi" id="benk"></div>
+<div class="mut" style="margin-top:12px">Sebaran skor (hijau: teks manusia, merah: teks AI)</div>
+<div class="strip" id="stH"></div><div class="strip" id="stA"></div>
+<div class="scroll"><table class="t"><thead><tr><th>Ambang</th><th>Manusia salah dituduh AI</th><th>AI lolos sebagai manusia</th><th>Akurasi seimbang</th></tr></thead><tbody id="benT"></tbody></table></div>
+<div class="row"><button class="b" id="benApply">Terapkan kalibrasi dari data ini</button><button class="g" id="benCsv">Unduh hasil (.csv)</button><span class="mut" id="benA"></span></div>
+</div>
+</section>
+<section id="set" class="hid">
+<div class="card">
+<b>Koneksi Claude</b>
+<p class="mut" style="margin:4px 0 10px">Mengaktifkan penilaian AI, parafrase, dan OCR di luar claude.ai. Pilih salah satu cara.</p>
+<label for="aiMode" class="mut">Cara koneksi</label>
+<select id="aiMode"><option value="off">Nonaktif (statistik lokal saja)</option><option value="key">Kunci API pribadi (disimpan di browser ini)</option><option value="proxy">Proxy / Cloudflare Worker (kunci ada di server)</option></select>
+<div id="aiKeyBox" hidden><label for="aiKey" class="mut" style="display:block;margin-top:10px">Kunci API Anthropic</label><input type="text" id="aiKey" placeholder="sk-ant-..." autocomplete="off" spellcheck="false" style="-webkit-text-security:disc"></div>
+<div id="aiPxBox" hidden><label for="aiPx" class="mut" style="display:block;margin-top:10px">Alamat Worker</label><input type="text" id="aiPx" placeholder="https://nama.akun.workers.dev" autocomplete="off" spellcheck="false"></div>
+<label for="aiModel" class="mut" style="display:block;margin-top:10px">Model</label>
+<select id="aiModel"><option value="claude-haiku-5-5">Haiku 5.5 (murah dan cepat)</option><option value="claude-sonnet-5-5">Sonnet 5.5 (lebih teliti, lebih mahal)</option></select>
+<div class="row"><button class="b" id="aiSave">Simpan</button><button class="g" id="aiTest">Tes koneksi</button><button class="g dng" id="aiClear">Hapus pengaturan</button><span class="mut" id="aiS"></span></div>
+<div class="note">Mode kunci pribadi: kunci disimpan di localStorage browser ini dan dikirim langsung ke api.anthropic.com. Pakai hanya di perangkat Anda sendiri, dan pasang batas pengeluaran bulanan di console.anthropic.com. Mode proxy: kunci tidak pernah masuk ke browser (lihat worker.js).</div>
+</div>
+</section>
+</main>
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+/*PURE-START*/
+const words=s=>(s.trim().match(/\S+/g)||[]).length;
+const esc=s=>String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+const MARK="[[DAFTAR PUSTAKA]]";
+const REFH=/^[ \t]*[^\w\n]*(daftar\s+pustaka|daftar\s+rujukan|daftar\s+referensi|referensi|references|bibliography)[^\w\n]*[ \t]*$/gim;
+function paras1(t){
+  let ps=t.split(/\n{2,}/).map(p=>p.replace(/\s*\n\s*/g," ").trim()).filter(p=>p.length>40);
+  if(ps.length<3){
+    const ss=t.replace(/\s+/g," ").match(/[^.!?]+[.!?]+/g)||[t];ps=[];
+    for(let i=0;i<ss.length;i+=4)ps.push(ss.slice(i,i+4).join(" ").trim());
+    ps=ps.filter(p=>p.length>0);
+  }
+  return ps;
+}
+function paragraphs(t){
+  t=t.replace(REFH,"\n\n"+MARK+"\n\n");
+  const out=[];
+  t.split(MARK).forEach((s,k)=>{if(k>0)out.push(MARK);out.push(...paras1(s))});
+  return out;
+}
+function splitDoc(text,o){
+  const out=[];let inRefs=false;
+  for(const p of paragraphs(text)){
+    if(p===MARK){inRefs=true;out.push({p,a:"",kind:"mark"});continue}
+    let kind="body",a=p;
+    if(inRefs)kind="refs";
+    else{
+      const letters=(p.match(/[A-Za-zÀ-ÿ]/g)||[]).length;
+      if(o.tab&&(letters/p.length<0.55||(/^(tabel|table|gambar|figure)\s*\d/i.test(p)&&p.length<160)))kind="table";
+      const q=(p.match(/["“][^"”]{25,}["”]/g)||[]).join("").length;
+      if(o.quo&&q/p.length>0.6)kind="quote";
+      else if(o.quo&&q&&kind==="body"){a=p.replace(/["“][^"”]{25,}["”]/g,"").replace(/\s+/g," ").trim();if(words(a)<8)kind="quote"}
+    }
+    out.push({p,a,kind});
+  }
+  return out;
+}
+const TR=["selain itu","oleh karena itu","dengan demikian","selanjutnya","secara keseluruhan","penting untuk","berperan penting","di era","pada dasarnya","moreover","furthermore","in conclusion","additionally","it is important","delve","in today","dapat disimpulkan bahwa","hal ini menunjukkan bahwa","memainkan peran","tidak dapat dipungkiri","seiring dengan perkembangan","berbagai aspek","holistik","krusial","lanskap","plays a crucial role","a testament to","tapestry","leverage","navigate the"];
+function heur2(p){
+  const ss=(p.match(/[^.!?]+[.!?]*/g)||[p]).map(s=>s.trim()).filter(s=>words(s)>2),n=ss.length;
+  if(n<2)return 50;
+  const len=ss.map(words),m=len.reduce((a,b)=>a+b,0)/n,cv=Math.sqrt(len.reduce((a,b)=>a+(b-m)**2,0)/n)/m;
+  const low=p.toLowerCase(),tr=TR.reduce((k,w)=>k+(low.split(w).length-1),0)/n;
+  const rep=1-new Set(ss.map(s=>s.toLowerCase().split(/\s+/).slice(0,2).join(" "))).size/n;
+  const spec=((p.match(/\d+/g)||[]).length+2*(p.match(/\([^)]*\d{4}[^)]*\)/g)||[]).length+(p.match(/["“]/g)||[]).length/2)/n;
+  const s=10+45*(1-Math.min(cv,.6)/.6)+30*Math.min(tr*4,1)+15*Math.min(rep*3,1)-25*Math.min(spec,1);
+  return Math.max(0,Math.min(100,Math.round(s)));
+}
+function simil(o,n){const g=s=>{const w=s.toLowerCase().match(/[a-zà-ÿ0-9]+/g)||[],z=new Set();for(let i=0;i<w.length-2;i++)z.add(w.slice(i,i+3).join(' '));return z};const A=g(o),B=g(n);let k=0;B.forEach(x=>{if(A.has(x))k++});return B.size?Math.round(100*k/B.size):0}
+
+/* ---- sitasi ---- */
+const norm=s=>String(s).normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
+function splitRefs(arr,style){
+  const e=[];
+  for(const p of arr){
+    if(style==="ieee")e.push(...p.split(/\s+(?=\[\d+\]\s)/));
+    else if(p.length>400)e.push(...p.split(/(?<=[.)])\s+(?=[\p{Lu}][\p{L}'’\-]+,\s+(?:\p{Lu}\.|\p{Lu}\p{Ll}+\s))/u));
+    else e.push(p);
+  }
+  return e.map(s=>s.trim()).filter(s=>s.length>15);
+}
+function apaCites(body){
+  const out=[];
+  body.replace(/\(([^()]*?\b(?:1[89]|20)\d{2}[a-z]?[^()]*?)\)/gu,(m,g)=>{
+    g.split(/;\s*/).forEach(part=>{
+      const y=part.match(/\b((?:1[89]|20)\d{2})[a-z]?\b/),a=part.match(/^\s*(?:lihat\s+|see\s+|cf\.\s*)?(\p{Lu}[\p{L}'’\-]+)/u);
+      if(y&&a)out.push({sur:a[1],year:y[1],raw:part.trim()});
+    });return m});
+  body.replace(/(\p{Lu}[\p{L}'’\-]+)(?:\s+(?:et al\.?|dkk\.?|dan|and|&)(?:\s+\p{Lu}[\p{L}'’\-]*)?)?\s+\(((?:1[89]|20)\d{2})[a-z]?\)/gu,(m,s,y)=>{out.push({sur:s,year:y,raw:m});return m});
+  return out;
+}
+function apaRef(s){
+  const m=s.match(/^\s*([\p{L}'’\-\s]+?),/u),y=s.match(/\(((?:1[89]|20)\d{2})[a-z]?\)|\b((?:1[89]|20)\d{2})[a-z]?\b/);
+  return{sur:m?m[1].trim().split(/\s+/).pop():null,year:y?(y[1]||y[2]):null};
+}
+function ieeeCites(body){
+  const out=new Set();
+  body.replace(/\[(\d+(?:\s*[,–-]\s*\d+)*)\]/g,(m,g)=>{
+    g.split(/\s*,\s*/).forEach(x=>{const r=x.split(/\s*[–-]\s*/);if(r.length===2){for(let i=+r[0];i<=+r[1]&&i-r[0]<200;i++)out.add(i)}else out.add(+r[0])});return m});
+  return out;
+}
+function refIssues(s,style){
+  const is=[];
+  if(style==="apa"){
+    if(!/\(((?:1[89]|20)\d{2}[a-z]?|n\.d\.)\)/.test(s))is.push("tahun tidak dalam tanda kurung");
+    if(!/^\s*\p{Lu}[\p{L}'’\- ]+,\s*\p{Lu}\./u.test(s))is.push("penulis tidak berformat Nama, I.");
+    if(!/[.)]\s*$/.test(s)&&!/https?:\/\/|10\.\d{4,9}\//.test(s))is.push("tidak diakhiri titik");
+  }else{
+    if(!/^\[\d+\]/.test(s))is.push("tidak diawali nomor [n]");
+    if(!/\b(?:1[89]|20)\d{2}\b/.test(s))is.push("tahun tidak ditemukan");
+  }
+  return is;
+}
+
+/* ---- pembanding ---- */
+function lcsDiff(KA,KB){
+  const n=KA.length,m=KB.length,W=m+1,D=new Uint16Array((n+1)*W);
+  for(let i=n-1;i>=0;i--)for(let j=m-1;j>=0;j--)D[i*W+j]=KA[i]===KB[j]?D[(i+1)*W+j+1]+1:Math.max(D[(i+1)*W+j],D[i*W+j+1]);
+  const out=[];let i=0,j=0;
+  while(i<n&&j<m){
+    if(KA[i]===KB[j]){out.push(["=",i,j]);i++;j++}
+    else if(D[(i+1)*W+j]>=D[i*W+j+1]){out.push(["-",i,-1]);i++}
+    else{out.push(["+",-1,j]);j++}
+  }
+  while(i<n)out.push(["-",i++,-1]);
+  while(j<m)out.push(["+",-1,j++]);
+  return out;
+}
+const key=w=>norm(w).replace(/[^a-z0-9]+/g,"");
+function diffPair(a,b){
+  const A=a.match(/\S+/g)||[],B=b.match(/\S+/g)||[];
+  if(A.length*B.length>4e6)return{l:"<del>"+esc(a)+"</del>",r:"<ins>"+esc(b)+"</ins>",same:0,tot:Math.max(A.length,B.length)};
+  const ops=lcsDiff(A.map(key),B.map(key));let l=[],r=[],same=0;
+  for(const [t,i,j] of ops){
+    if(t==="=")same++;
+    if(t==="="){l.push(esc(A[i]));r.push(esc(B[j]))}
+    else if(t==="-")l.push("<del>"+esc(A[i])+"</del>");
+    else r.push("<ins>"+esc(B[j])+"</ins>");
+  }
+  return{l:l.join(" "),r:r.join(" "),same,tot:Math.max(A.length,B.length)};
+}
+
+/* ---- uji tolok ukur ---- */
+function metrics(H,A){
+  let auc=0;for(const a of A)for(const h of H)auc+=a>h?1:a===h?.5:0;auc/=H.length*A.length;
+  const at=t=>({fpr:H.filter(x=>x>=t).length/H.length,fnr:A.filter(x=>x<t).length/A.length});
+  let best=null;
+  for(let t=1;t<=100;t++){const r=at(t),ba=1-(r.fpr+r.fnr)/2;if(!best||ba>best.ba+1e-9)best={t,ba,fpr:r.fpr,fnr:r.fnr}}
+  return{auc,at,best};
+}
+function splitSamples(t){return t.split(/\n[ \t]*-{3,}[ \t]*\n/).map(s=>s.trim()).filter(s=>words(s)>=40)}
+
+/* ---- Word (.docx) tanpa library dokumen ---- */
+function xe(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g,"")}
+const hx=a=>Array.isArray(a)?a.map(v=>v.toString(16).padStart(2,"0")).join(""):a;
+function docxParts(title,blocks){
+  const run=(t,o)=>{o=o||{};return'<w:r><w:rPr>'+(o.b?"<w:b/>":"")+(o.c?'<w:color w:val="'+hx(o.c)+'"/>':"")+'</w:rPr><w:t xml:space="preserve">'+xe(t)+'</w:t></w:r>'};
+  const para=(inner,style)=>"<w:p>"+(style?'<w:pPr><w:pStyle w:val="'+style+'"/></w:pPr>':"")+inner+"</w:p>";
+  let body=para(run(title),"Title");
+  for(const b of blocks){
+    if(b.h)body+=para(run(b.h,{c:b.c}),"Heading2");
+    if(b.t)String(b.t).split(/\n+/).forEach(l=>{body+=para(run(l))});
+  }
+  const NS='xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"';
+  const X='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
+  return{
+    "[Content_Types].xml":X+'<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/></Types>',
+    "_rels/.rels":X+'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>',
+    "word/_rels/document.xml.rels":X+'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>',
+    "word/styles.xml":X+'<w:styles '+NS+'><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri" w:cs="Calibri"/><w:sz w:val="22"/><w:lang w:val="id-ID"/></w:rPr></w:rPrDefault><w:pPrDefault><w:pPr><w:spacing w:after="140" w:line="300" w:lineRule="auto"/></w:pPr></w:pPrDefault></w:docDefaults><w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/></w:style><w:style w:type="paragraph" w:styleId="Title"><w:name w:val="Title"/><w:basedOn w:val="Normal"/><w:pPr><w:spacing w:after="240"/></w:pPr><w:rPr><w:b/><w:sz w:val="36"/></w:rPr></w:style><w:style w:type="paragraph" w:styleId="Heading2"><w:name w:val="heading 2"/><w:basedOn w:val="Normal"/><w:pPr><w:keepNext/><w:spacing w:before="240" w:after="80"/></w:pPr><w:rPr><w:b/><w:sz w:val="24"/></w:rPr></w:style></w:styles>',
+    "word/document.xml":X+'<w:document '+NS+'><w:body>'+body+'<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1440" w:right="1440" w:bottom="1440" w:left="1440" w:header="708" w:footer="708" w:gutter="0"/></w:sectPr></w:body></w:document>'
+  };
+}
+/*PURE-END*/
+
+const $=id=>document.getElementById(id);
+const C=window.claude;
+let sample=null,dl=null,SERVER=null,LAST=null,CANCEL=false;
+if(C&&C.use){C.use("sample").then(s=>{sample=s}).catch(()=>{});C.use("downloads").then(s=>{dl=s}).catch(()=>{})}
+fetch("/api/health").then(r=>r.json()).then(j=>{if(j&&j.ok){SERVER=j;serverUi()}}).catch(()=>{});
+function serverUi(){
+  const d=(SERVER.detectors||[]).join(", ");
+  $("srv").textContent="Server perantara terhubung. Detektor eksternal: "+(d||"belum ada kunci API")+". Crossref: aktif.";
+  $("runCr").disabled=false;
+}
+async function saveFile(name,blob,st){
+  try{
+    if(dl){await dl.save({filename:name,data:blob})}
+    else{const u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),2000)}
+    if(st)$(st).textContent="File siap diunduh: "+name;
+  }catch(e){if(st)$(st).textContent="Gagal menyimpan file: "+((e&&e.message)||e)}
+}
+
+function show(t){["set","home","doc","det","par","cit","cmp","ben"].forEach(k=>$(k).classList.toggle("hid",k!==t));
+document.querySelectorAll(".tab").forEach(b=>{const on=b.dataset.t===t;b.classList.toggle("on",on);if(on&&$("pgT"))$("pgT").textContent=b.textContent.replace(/^\S+\s/,"")});window.scrollTo(0,0)}
+document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>show(b.dataset.t));
+
+/* ===== Opsi bagian laporan ===== */
+function opts(){return{refs:$("oRefs").checked,tab:$("oTab").checked,quo:$("oQuo").checked}}
+["oRefs","oTab","oQuo"].forEach(id=>{
+  try{const v=localStorage.getItem(id);if(v!=null)$(id).checked=v==="1"}catch{}
+  $(id).onchange=()=>{try{localStorage.setItem(id,$(id).checked?"1":"0")}catch{}osum()};
+});
+function analysisItems(text){const o=opts();return splitDoc(text,o).filter(x=>x.kind==="body"||(x.kind==="refs"&&!o.refs))}
+function osum(){
+  const it=splitDoc($("txt").value,opts());
+  if(!it.length){$("osum").textContent="";return}
+  const c={body:0,refs:0,table:0,quote:0};it.forEach(x=>{if(c[x.kind]!=null)c[x.kind]++});
+  const o=opts(),used=c.body+(o.refs?0:c.refs);
+  $("osum").textContent=used+" paragraf dinilai. Dilewati: "+(o.refs?c.refs:0)+" daftar pustaka, "+c.table+" tabel/angka, "+c.quote+" kutipan.";
+}
+$("txt").oninput=()=>{$("cnt").textContent=words($("txt").value)+" kata";osum()};
+
+/* ===== PDF dan OCR ===== */
+$("drop").onclick=()=>$("file").click();
+$("drop").onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();$("file").click()}};
+$("drop").ondragover=e=>e.preventDefault();
+$("drop").ondrop=e=>{e.preventDefault();if(e.dataTransfer.files[0])readFile(e.dataTransfer.files[0])};
+$("file").onchange=e=>{if(e.target.files[0])readFile(e.target.files[0])};
+function readFile(f){return (f.type||"").startsWith("image/")?readImage(f):readPdf(f)}
+async function ocrOk(){
+  if(!sample)return false;
+  try{const l=await sample.limits();return !!(l&&l.images)}catch{return false}
+}
+const OCR_PROMPT="Salin seluruh teks pada gambar halaman dokumen ini apa adanya (OCR). Pisahkan paragraf dengan satu baris kosong dan gabungkan baris yang terpotong di tengah kalimat. Tulis hanya teks hasil salinan tanpa komentar. Jika tidak ada teks, balas dengan string kosong.";
+async function ocrBlob(blob){const r=await sample(OCR_PROMPT,{images:[blob],cache:false,modelTier:"default"});return (r.text||"").trim()}
+const toBlob=cv=>new Promise(res=>cv.toBlob(res,"image/jpeg",.85));
+async function readImage(f){
+  const info=$("finfo");
+  if(!await ocrOk()){info.textContent="OCR memerlukan Claude dengan izin gambar; tidak tersedia di tampilan ini.";return}
+  try{
+    info.textContent="Membaca gambar dengan OCR...";
+    const t=await ocrBlob(f);
+    if(!t){info.textContent="Tidak ada teks yang terbaca di gambar.";return}
+    $("txt").value=paragraphs(t).join("\n\n");$("txt").oninput();
+    info.textContent="✓ "+f.name+" dibaca dengan OCR. Periksa hasilnya, karena OCR bisa salah baca.";
+  }catch(e){info.textContent=(e&&e.code==="not_granted")?"Izin AI ditolak.":"Gagal OCR: "+((e&&e.message)||e)}
+}
+async function readPdf(f){
+  const info=$("finfo");
+  try{
+    if(!window.pdfjsLib){info.textContent="Library PDF belum termuat, coba lagi.";return}
+    pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+    info.textContent="Membaca "+f.name+"...";
+    const pdf=await pdfjsLib.getDocument({data:await f.arrayBuffer()}).promise;
+    const ocrOn=$("oOcr").checked&&await ocrOk();let out=[],nOcr=0,ocrErr=null,scanSkipped=0;
+    for(let i=1;i<=pdf.numPages;i++){
+      const page=await pdf.getPage(i),c=await page.getTextContent();
+      let s="";c.items.forEach(it=>{s+=it.str+(it.hasEOL?"\n":" ")});
+      if(s.replace(/\s/g,"").length<25){
+        if(ocrOn&&nOcr<40&&!ocrErr){
+          try{
+            info.textContent="OCR halaman "+i+"/"+pdf.numPages+"...";
+            const vp=page.getViewport({scale:1.6}),cv=document.createElement("canvas");cv.width=vp.width;cv.height=vp.height;
+            await page.render({canvasContext:cv.getContext("2d"),viewport:vp}).promise;
+            s=await ocrBlob(await toBlob(cv));nOcr++;
+          }catch(e){ocrErr=e}
+        }else scanSkipped++;
+      }
+      out.push(s);
+      if(!(ocrOn&&nOcr))info.textContent="Halaman "+i+"/"+pdf.numPages;
+    }
+    const t=out.join("\n\n").replace(/-\n(?=[a-z])/g,"").replace(/[ \t]+/g," ");
+    $("txt").value=paragraphs(t).join("\n\n");$("txt").oninput();
+    let m="✓ "+f.name+" ("+pdf.numPages+" halaman)";
+    if(nOcr)m+=", "+nOcr+" halaman scan dibaca dengan OCR, periksa hasilnya";
+    if(ocrErr)m+=". OCR berhenti: "+((ocrErr.code==="not_granted")?"izin AI ditolak":(ocrErr.message||ocrErr));
+    else if(scanSkipped)m+=". "+scanSkipped+" halaman tanpa teks dilewati (OCR dimatikan, tidak tersedia, atau melebihi 40 halaman)";
+    info.textContent=m;
+  }catch(e){info.textContent="Gagal membaca PDF: "+(e.message||e)}
+}
+
+/* ===== Skala, kalibrasi, sorotan ===== */
+const col=s=>s>=70?"var(--bad)":s>=40?"var(--wn)":"var(--ok)";
+const lbl=s=>s>=70?"Kemungkinan AI tinggi":s>=40?"Campuran / perlu dicek":"Cenderung manusia";
+const rgb=s=>s>=70?[210,60,60]:s>=40?[200,130,0]:[26,154,91];
+function cal(s){let c={a:1,b:0};try{c=JSON.parse(localStorage.getItem("cal"))||c}catch{}return Math.max(0,Math.min(100,Math.round(c.a*s+c.b)))}
+function hl(x){let h=esc(x.p);(x.fl||[]).forEach(f=>{if(typeof f==="string"&&f.length>8){const e=esc(f);h=h.split(e).join("<mark>"+e+"</mark>")}});return h}
+async function rawScore(t,useAI){
+  const ps=paragraphs(t).filter(p=>p!==MARK).slice(0,6);if(!ps.length)return 50;
+  const hm=ps.map(heur2).reduce((a,b)=>a+b,0)/ps.length;
+  if(useAI===false||!sample)return Math.round(hm);
+  try{const r=await sample.json('Perkirakan persentase (0-100) kemungkinan teks ini ditulis AI. Balas HANYA JSON {"score":number}.\n\n'+t.slice(0,3000),{modelTier:"default",cache:false});return Math.round(.65*r.score+.35*hm)}catch{return Math.round(hm)}
+}
+function fitCal(sh,sa){const A=Math.max(.5,Math.min(2,70/(sa-sh))),B=15-A*sh;try{localStorage.setItem("cal",JSON.stringify({a:A,b:B}))}catch{}}
+$("calBtn").onclick=async()=>{
+  const h=$("calH").value.trim(),a=$("calA").value.trim();
+  if(words(h)<60||words(a)<60){$("calS").textContent="Isi masing-masing minimal 60 kata.";return}
+  if(!sample){$("calS").textContent="Fitur AI belum aktif. Atur di menu Pengaturan.";return}
+  $("calS").textContent="Mengkalibrasi...";
+  const sh=await rawScore(h),sa=await rawScore(a);
+  if(sa-sh<10){$("calS").textContent="Skor manusia "+sh+" vs AI "+sa+": terlalu dekat, detektor sulit membedakan. Kalibrasi dibatalkan.";return}
+  fitCal(sh,sa);
+  $("calS").textContent="Tersimpan. Skor mentah manusia "+sh+", AI "+sa+" (selisih "+(sa-sh)+" poin).";
+};
+$("calReset").onclick=()=>{try{localStorage.removeItem("cal")}catch{}$("calS").textContent="Kalibrasi direset."};
+
+/* ===== Riwayat skor ===== */
+const histGet=()=>{try{return JSON.parse(localStorage.getItem("hist"))||[]}catch{return[]}};
+function histPush(e){const h=histGet();h.push(e);try{localStorage.setItem("hist",JSON.stringify(h.slice(-40)))}catch{}renderHist()}
+function renderHist(){
+  const h=histGet();$("hempty").hidden=h.length>0;
+  $("hbody").innerHTML=h.map((e,i)=>{
+    const d=i?e.avg-h[i-1].avg:null,dt=new Date(e.t);
+    const ds=d==null?"–":(d>0?"+":"")+d+" poin";
+    return `<tr><td>${esc(dt.toLocaleDateString("id-ID")+" "+dt.toLocaleTimeString("id-ID",{hour:"2-digit",minute:"2-digit"}))}</td><td>${esc(e.label||"Deteksi")}</td><td>${e.n}</td><td style="color:${col(e.avg)}"><b>${e.avg}%</b></td><td style="color:${d==null?"var(--mut)":d<0?"var(--ok)":d>0?"var(--bad)":"var(--mut)"}">${ds}</td></tr>`}).join("");
+}
+$("hclear").onclick=()=>{try{localStorage.removeItem("hist")}catch{}renderHist()};
+renderHist();
+
+/* ===== Detektor (bertahap untuk dokumen panjang) ===== */
+$("toDet").onclick=()=>{show("det");if($("txt").value.trim())$("runDet").click()};
+$("toCit").onclick=()=>{show("cit");if($("txt").value.trim())$("runCit").click()};
+$("dcancel").onclick=()=>{CANCEL=true;$("dstat").textContent="Membatalkan setelah tahap ini selesai..."};
+async function extDetect(texts){
+  const r=await fetch("/api/detect",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({texts})});
+  const j=await r.json();if(!r.ok)throw new Error(j.error||("HTTP "+r.status));
+  return j;
+}
+const P1="Kamu penilai teks akademik. Untuk setiap paragraf bernomor, perkirakan persentase (0-100) kemungkinan paragraf ditulis oleh AI, berdasarkan pola: kalimat seragam, transisi klise, generalisasi kosong, minim detail spesifik/sitasi. Balas HANYA JSON array: [{\"i\":0,\"score\":number,\"reason\":\"alasan singkat bahasa Indonesia\"}] untuk semua paragraf.\n\n";
+const P2="Kamu editor yang menilai keaslian tulisan manusia. Untuk setiap paragraf bernomor beri \"human\" (0-100, seberapa mungkin ditulis manusia: ada detail spesifik, opini, ketidaksempurnaan alami) dan \"flags\": maksimal 3 frasa PERSIS (salinan harfiah) dari paragraf yang terdengar generik/klise ala AI. Balas HANYA JSON array: [{\"i\":0,\"human\":number,\"flags\":[\"...\"]}].\n\n";
+$("runDet").onclick=async()=>{
+  const items=analysisItems($("txt").value);
+  if(!items.length){$("dstat").textContent="Isi teks dokumen terlebih dahulu (atau semua bagian terlewati oleh pengaturan di tab Dokumen).";return}
+  const ps=items.map(x=>x.a||x.p),N=ps.length,H=ps.map(heur2),CH=8,res=new Array(N);
+  CANCEL=false;$("runDet").disabled=true;$("dcancel").hidden=false;$("dprog").hidden=false;
+  let aiOk=!!sample,aiMsg="",extOn=!!(SERVER&&(SERVER.detectors||[]).length&&$("useExt").checked),extMsg="";
+  for(let s=0;s<N&&!CANCEL;s+=CH){
+    const idx=[];for(let g=s;g<Math.min(s+CH,N);g++)idx.push(g);
+    $("dpbar").style.width=Math.round(100*s/N)+"%";
+    $("dstat").textContent="Menganalisis paragraf "+(s+1)+" sampai "+(idx[idx.length-1]+1)+" dari "+N+"...";
+    let L=null,L2=null,E=null;
+    if(aiOk){
+      try{
+        const list=idx.map((g,k)=>"["+k+"] "+ps[g].slice(0,700)).join("\n\n");
+        L=await sample.json(P1+list,{modelTier:"default",cache:false});
+        L2=await sample.json(P2+list,{modelTier:"default",cache:false});
+      }catch(e){aiMsg=(e&&e.message)||"AI tidak merespons";if(e&&(e.code==="not_granted"||e.code==="rate_limited"))aiOk=false}
+    }
+    if(extOn){try{E=(await extDetect(idx.map(g=>ps[g]))).scores}catch(e){extMsg=e.message;extOn=false}}
+    idx.forEach((g,k)=>{
+      const l=Array.isArray(L)?L.find(x=>x&&x.i===k):null,l2=Array.isArray(L2)?L2.find(x=>x&&x.i===k):null;
+      const a=l&&isFinite(l.score)?+l.score:null,b=l2&&isFinite(l2.human)?100-l2.human:null,e=E&&E[k]!=null?+E[k]:null;
+      const v=[a,b].filter(q=>q!=null);
+      let raw=v.length?.65*(v.reduce((x,y)=>x+y,0)/v.length)+.35*H[g]:H[g];
+      if(e!=null)raw=.5*e+.5*raw;
+      const all=[...v,H[g]].concat(e!=null?[e]:[]),spread=Math.max(...all)-Math.min(...all);
+      const conf=words(ps[g])<60||spread>45?"rendah":spread>25?"sedang":"tinggi";
+      res[g]={p:items[g].p,s:cal(raw),conf,fl:(l2&&Array.isArray(l2.flags)&&l2.flags)||[],e,w:words(ps[g]),r:l&&l.reason?l.reason:"Berdasarkan statistik lokal."};
+    });
+  }
+  const R=res.filter(Boolean);
+  if(!R.length){$("dstat").textContent="Dibatalkan sebelum ada hasil.";endDet();return}
+  const tw=R.reduce((a,b)=>a+b.w,0)||1;
+  let avg=Math.round(R.reduce((a,b)=>a+b.s*b.w,0)/tw);
+  if(aiOk&&!CANCEL){
+    try{
+      const step=Math.max(1,Math.ceil(N/6)),smp=ps.filter((_,i)=>i%step===0).join("\n\n").slice(0,6000);
+      const d=await sample.json('Perkirakan persentase (0-100) kemungkinan seluruh dokumen ini ditulis AI (pertimbangkan konsistensi gaya, kedalaman, dan detail spesifik). Balas HANYA JSON {"score":number}.\n\n'+smp,{modelTier:"default",cache:false});
+      avg=Math.round(.5*avg+.5*cal(.65*d.score+.35*(H.reduce((a,b)=>a+b,0)/H.length)));
+    }catch{}
+  }
+  LAST={R,avg};
+  $("pdfD").disabled=false;$("docD").disabled=false;
+  $("dsum").classList.remove("hid");$("dlistc").classList.remove("hid");
+  $("dscore").textContent=avg+"% — "+lbl(avg);$("dscore").style.color=col(avg);
+  $("dbar").style.width=avg+"%";$("dbar").style.background=col(avg);
+  $("dlist").innerHTML=R.map((x,i)=>`<div class="p"><div class="row" style="margin:0"><b>Paragraf ${i+1}</b><span class="tag" style="color:${col(x.s)}">${x.s}% · ${lbl(x.s)}</span><span class="mut">keyakinan ${x.conf}</span>${x.e!=null?`<span class="mut">detektor eksternal ${Math.round(x.e)}%</span>`:""}</div>
+  <div class="bar"><i style="width:${x.s}%;background:${col(x.s)}"></i></div>
+  <div class="t" onclick="this.classList.toggle('open')">${hl(x)}</div>
+  <div class="mut">💡 ${esc(String(x.r))}</div>
+  <div class="row"><button class="g" data-i="${i}">Parafrase paragraf ini</button></div></div>`).join("");
+  $("dlist").querySelectorAll("button").forEach(b=>b.onclick=()=>{$("pin").value=R[b.dataset.i].p;show("par");$("runPar").click()});
+  const notes=[];
+  if(CANCEL)notes.push("dibatalkan, "+R.length+" dari "+N+" paragraf dinilai");
+  if(!sample)notes.push("tanpa AI (statistik lokal; aktifkan di Pengaturan)");else if(aiMsg)notes.push("sebagian tahap tanpa AI: "+aiMsg);
+  if(extMsg)notes.push("detektor eksternal berhenti: "+extMsg);
+  $("dstat").textContent="Selesai"+(notes.length?" ("+notes.join("; ")+")":"")+".";
+  histPush({t:Date.now(),label:$("hlabel").value.trim()||"Deteksi",n:words(ps.join(" ")),avg});
+  endDet();
+};
+function endDet(){$("runDet").disabled=false;$("dcancel").hidden=true;$("dprog").hidden=true}
+
+/* ===== PDF dan Word ===== */
+const cl=s=>String(s).replace(/[“”]/g,'"').replace(/[‘’]/g,"'").replace(/[–—]/g,'-').replace(/…/g,'...').replace(/[^\x00-\xFF]/g,'');
+function mkPdf(title,blocks){
+  const d=new window.jspdf.jsPDF({unit:'mm',format:'a4'}),M=20,W=170;let y=M;
+  const need=h=>{if(y+h>282){d.addPage();y=M}};
+  d.setFont('helvetica','bold');d.setFontSize(16);d.setTextColor(20);d.text(cl(title),M,y);y+=10;
+  for(const b of blocks){
+    if(b.h){d.setFont('helvetica','bold');d.setFontSize(11);d.setTextColor(...(b.c||[20,20,20]));need(8);d.text(cl(b.h),M,y);y+=6}
+    if(b.t){d.setFont('helvetica','normal');d.setFontSize(11);d.setTextColor(40);
+      for(const l of d.splitTextToSize(cl(b.t),W)){need(6);d.text(l,M,y);y+=5.5}y+=4}
+  }
+  return d.output('blob');
+}
+async function savePdf(file,title,blocks,st){
+  try{if(!window.jspdf)throw new Error('Library PDF belum termuat');await saveFile(file,mkPdf(title,blocks),st)}
+  catch(e){$(st).textContent='Gagal membuat PDF: '+((e&&e.message)||e)}
+}
+async function saveDocx(file,title,blocks,st){
+  try{
+    if(!window.JSZip)throw new Error("Library Word belum termuat");
+    const z=new JSZip();Object.entries(docxParts(title,blocks)).forEach(([k,v])=>z.file(k,v));
+    const blob=await z.generateAsync({type:"blob",mimeType:"application/vnd.openxmlformats-officedocument.wordprocessingml.document"});
+    await saveFile(file,blob,st);
+  }catch(e){$(st).textContent="Gagal membuat Word: "+((e&&e.message)||e)}
+}
+const parBlocks=()=>$('pout').value.trim().split(/\n{2,}/).map(x=>({t:x}));
+const detBlocks=()=>{
+  const b=[{h:'Perkiraan kemungkinan teks AI (keseluruhan): '+LAST.avg+'% - '+lbl(LAST.avg),c:rgb(LAST.avg)}];
+  LAST.R.forEach((x,i)=>b.push({h:'Paragraf '+(i+1)+': '+x.s+'% - '+lbl(x.s)+' (keyakinan '+x.conf+')',c:rgb(x.s),t:x.p+'\nCatatan: '+x.r}));
+  b.push({t:'Catatan: hasil bersifat perkiraan dan bukan bukti. Gunakan sebagai petunjuk revisi.'});return b;
+};
+$('pdfP').onclick=()=>{if(!$('pout').value.trim()){$('pstat').textContent='Belum ada hasil parafrase.';return}savePdf('hasil-parafrase.pdf','Hasil Parafrase',parBlocks(),'pstat')};
+$('docP').onclick=()=>{if(!$('pout').value.trim()){$('pstat').textContent='Belum ada hasil parafrase.';return}saveDocx('hasil-parafrase.docx','Hasil Parafrase',parBlocks(),'pstat')};
+$('pdfD').onclick=()=>{if(LAST)savePdf('laporan-deteksi-ai.pdf','Laporan Deteksi AI',detBlocks(),'dstat')};
+$('docD').onclick=()=>{if(LAST)saveDocx('laporan-deteksi-ai.docx','Laporan Deteksi AI',detBlocks(),'dstat')};
+$('parAllD').onclick=()=>{show('par');$('runAll').click()};
+
+/* ===== Parafrase ===== */
+const MODES={akademik:"gaya akademik formal, objektif, dan kohesif seperti laporan ilmiah",sederhana:"bahasa yang lebih sederhana dan jelas tanpa mengubah makna",ringkas:"lebih ringkas, padat, tanpa kehilangan informasi kunci",natural:"gaya natural manusia dengan variasi panjang kalimat dan struktur, hindari frasa klise AI"};
+async function batch(arr,strong){
+  const list=arr.map((p,i)=>'['+i+'] '+p).join('\n\n');
+  const r=await sample.json('Parafrasekan SETIAP paragraf bernomor berikut dalam '+$('lang').value+' dengan '+MODES[$('mode').value]+'. Pertahankan makna, fakta, angka, istilah teknis, dan penanda sitasi apa adanya. Ubah struktur dan pilihan kata secara nyata, variasikan panjang kalimat, hindari transisi klise'+(strong?', dan ubah jauh lebih drastis (susun ulang urutan klausa, ganti sinonim, jangan menyalin 3 kata berurutan dari aslinya)':'')+'. Jumlah item keluaran harus sama persis dengan masukan. Balas HANYA JSON array berisi string, berurutan, satu per paragraf.\n\n'+list,{modelTier:'default',cache:false});
+  return Array.isArray(r)&&r.length===arr.length?r.map(String):null;
+}
+$('runAll').onclick=async()=>{
+  if(!sample){$('pstat').textContent='Fitur AI belum aktif. Atur koneksi Claude di menu Pengaturan.';return}
+  const src=$('txt').value.trim()?$('txt').value:$('pin').value;
+  const items=splitDoc(src,opts());
+  const bi=[];items.forEach((x,i)=>{if(x.kind==="body")bi.push(i)});
+  if(!bi.length){$('pstat').textContent='Tidak ada paragraf isi untuk diparafrase. Isi teks di tab Dokumen dulu.';return}
+  const ps=bi.map(i=>items[i].p),out=[];
+  const rebuild=arr=>items.map((x,i)=>{const k=bi.indexOf(i);return k>=0&&arr[k]!=null?arr[k]:x.p}).join('\n\n');
+  $('runAll').disabled=true;$('runPar').disabled=true;
+  try{
+    for(let i=0;i<ps.length;i+=4){
+      $('pstat').textContent='Memparafrase '+Math.min(i+4,ps.length)+'/'+ps.length+' paragraf...';
+      const ch=ps.slice(i,i+4);let r=await batch(ch,false);
+      if(!r){r=[];for(const c of ch){const x=await batch([c],false);r.push(x?x[0]:c)}}
+      out.push(...r);$('pout').value=rebuild(out);
+    }
+    const weak=out.map((n,i)=>(simil(ps[i],n)>45||cal(heur2(n))>=70)?i:-1).filter(i=>i>=0).slice(0,12);
+    if(weak.length){$('pstat').textContent='Memperhalus '+weak.length+' paragraf yang masih mirip/terasa AI...';
+      const r=await batch(weak.map(i=>ps[i]),true);if(r)weak.forEach((w,k)=>{out[w]=r[k]})}
+    $('pout').value=rebuild(out);
+    const sm=Math.round(out.reduce((a,n,i)=>a+simil(ps[i],n),0)/out.length),ai=Math.round(out.reduce((a,n)=>a+cal(heur2(n)),0)/out.length);
+    $('pstat').textContent='Selesai '+ps.length+' paragraf · rata-rata kemiripan frasa '+sm+'% · skor AI lokal '+ai+'%. Periksa makna & sitasi, lalu Cek ulang di Detektor.';
+  }catch(e){$('pstat').textContent=(e&&e.code==='not_granted')?'Izin AI ditolak.':((e&&e.message)||'Gagal memparafrase.');if(out.length)$('pout').value=rebuild(out)}
+  $('runAll').disabled=false;$('runPar').disabled=false;
+};
+$("runPar").onclick=async()=>{
+  const t=$("pin").value.trim();if(!t){$("pstat").textContent="Isi teks asli dulu.";return}
+  if(!sample){$("pstat").textContent="Fitur AI belum aktif. Atur koneksi Claude di menu Pengaturan.";return}
+  $("runPar").disabled=true;$("pstat").textContent="Memparafrase...";$("pout").value="";
+  try{
+    const r=await sample("Parafrasekan teks berikut dalam "+$("lang").value+" dengan "+MODES[$("mode").value]+". Pertahankan makna, fakta, angka, istilah teknis, dan penanda sitasi (misal (Nama, 2020)) apa adanya. Ubah struktur kalimat dan pilihan kata secara nyata, jangan menambah informasi baru. Balas hanya dengan teks hasil parafrase.\n\nTEKS:\n"+t,{cache:false,onText:({text})=>{$("pout").value=text}});
+    $("pout").value=r.text.trim();await verify(t,r.text.trim());
+  }catch(e){$("pstat").textContent=(e&&e.code==="not_granted")?"Izin AI ditolak.":((e&&e.message)||"Gagal memparafrase.")}
+  $("runPar").disabled=false;
+};
+async function verify(o,n){
+  const sim=simil(o,n),ai=cal(heur2(n));
+  $("pstat").textContent="Kemiripan frasa: "+sim+"% · Skor AI lokal: "+ai+"% · memeriksa makna...";
+  try{
+    const v=await sample.json('Bandingkan ASLI dan PARAFRASE. Balas HANYA JSON {"meaning_preserved":boolean,"issues":"daftar singkat perubahan makna/angka/istilah/sitasi yang hilang, atau string kosong"}.\n\nASLI:\n'+o+'\n\nPARAFRASE:\n'+n,{modelTier:"quick",cache:false});
+    $("pstat").textContent="Kemiripan frasa: "+sim+(sim>40?"% (masih terlalu mirip, parafrase ulang)":"%")+" · Skor AI lokal: "+ai+"% · Makna: "+(v.meaning_preserved?"terjaga ✓":"⚠ "+v.issues);
+  }catch{$("pstat").textContent="Kemiripan frasa: "+sim+"% · Skor AI lokal: "+ai+"%"}
+}
+$("cp").onclick=async()=>{try{await navigator.clipboard.writeText($("pout").value);$("pstat").textContent="Tersalin."}catch{$("pout").select();document.execCommand&&document.execCommand("copy");$("pstat").textContent="Disalin."}};
+$("dl").onclick=()=>saveFile("parafrase.txt",new Blob([$("pout").value],{type:"text/plain"}),"pstat");
+$("back").onclick=()=>{if(!$("pout").value.trim())return;$("txt").value=$("pout").value;$("txt").oninput();show("det");$("runDet").click()};
+$("toCmp").onclick=()=>{if(!$("pout").value.trim())return;$("cA").value=$("txt").value.trim()?$("txt").value:$("pin").value;$("cB").value=$("pout").value;show("cmp");$("runCmp").click()};
+
+/* ===== Sitasi ===== */
+let CIT=null;
+$("runCit").onclick=()=>{
+  const ps=paragraphs($("txt").value);
+  if(!ps.length){$("cstat").textContent="Isi teks dokumen terlebih dahulu.";return}
+  const k=ps.indexOf(MARK),body=(k<0?ps:ps.slice(0,k)).join("\n"),refPs=k<0?[]:ps.slice(k+1);
+  let style=$("cstyle").value;
+  if(style==="auto"){const nb=refPs.join(" ").match(/\[\d+\]/g)||[];style=nb.length>=3&&nb.length>=refPs.length/2?"ieee":"apa"}
+  const refs=splitRefs(refPs,style);
+  const out=[];
+  if(k<0)out.push('<div class="card"><b>Daftar pustaka tidak ditemukan.</b><div class="mut">Tambahkan baris judul "Daftar Pustaka" atau "Referensi" sebelum daftar referensi agar dikenali.</div></div>');
+  let missing=[],uncited=[],issues=[],nCite=0;
+  if(style==="apa"){
+    const cites=apaCites(body),seen=new Map();
+    cites.forEach(c=>{const kk=norm(c.sur)+c.year;if(!seen.has(kk))seen.set(kk,c)});nCite=seen.size;
+    const rk=refs.map(r=>{const a=apaRef(r);return{r,key:a.sur?norm(a.sur)+a.year:null}});
+    const rset=new Set(rk.map(x=>x.key));
+    seen.forEach((c,kk)=>{if(!rset.has(kk))missing.push(c.sur+" ("+c.year+")")});
+    rk.forEach(x=>{if(x.key&&!seen.has(x.key))uncited.push(x.r);if(!x.key)issues.push({r:x.r,is:["penulis atau tahun tidak terbaca"]})});
+    refs.forEach(r=>{const is=refIssues(r,"apa");if(is.length)issues.push({r,is})});
+  }else{
+    const cs=ieeeCites(body);nCite=cs.size;
+    const nums=new Set();refs.forEach(r=>{const m=r.match(/^\[(\d+)\]/);if(m)nums.add(+m[1])});
+    cs.forEach(n=>{if(!nums.has(n))missing.push("["+n+"]")});
+    refs.forEach(r=>{const m=r.match(/^\[(\d+)\]/);if(m&&!cs.has(+m[1]))uncited.push(r);const is=refIssues(r,"ieee");if(is.length)issues.push({r,is})});
+  }
+  CIT={style,refs};
+  const list=(arr,f)=>arr.length?arr.map(f).join(""):'<div class="mut">Tidak ada.</div>';
+  out.push(`<div class="card"><b>Ringkasan (${style==="apa"?"APA":"IEEE"})</b><div class="kpi"><div><b>${nCite}</b><span class="mut">sitasi unik di teks</span></div><div><b>${refs.length}</b><span class="mut">entri daftar pustaka</span></div><div><b style="color:${missing.length?"var(--bad)":"var(--ok)"}">${missing.length}</b><span class="mut">sitasi tanpa entri</span></div><div><b style="color:${uncited.length?"var(--wn)":"var(--ok)"}">${uncited.length}</b><span class="mut">entri tidak disitir</span></div><div><b style="color:${issues.length?"var(--wn)":"var(--ok)"}">${issues.length}</b><span class="mut">entri bermasalah format</span></div></div></div>`);
+  out.push(`<div class="card"><b>Sitasi di teks yang tidak ada di daftar pustaka</b>${list(missing,m=>`<div class="item">${esc(m)}</div>`)}</div>`);
+  out.push(`<div class="card"><b>Entri daftar pustaka yang tidak disitir di teks</b>${list(uncited,m=>`<div class="item">${esc(m)}</div>`)}</div>`);
+  out.push(`<div class="card"><b>Masalah format dasar</b>${list(issues,x=>`<div class="item">${esc(x.r)}<div class="mut">⚠ ${esc(x.is.join("; "))}</div></div>`)}</div>`);
+  out.push(`<div class="card hid" id="crc"><b>Hasil validasi Crossref</b><div id="crl"></div></div>`);
+  $("cres").innerHTML=out.join("");
+  $("cstat").textContent=refs.length?"Selesai. "+"Klik Validasi di Crossref untuk memeriksa apakah tiap referensi nyata.":"Tidak ada entri daftar pustaka yang terbaca.";
+};
+function toks(s){return norm(s).split(/[^a-z0-9]+/).filter(w=>w.length>3)}
+async function crQ(doi,r){
+  if(SERVER){const res=await fetch("/api/crossref?"+(doi?"doi="+encodeURIComponent(doi):"q="+encodeURIComponent(r.slice(0,300))));const j=await res.json();if(!res.ok)throw new Error(j.error||"HTTP "+res.status);return j}
+  let items;
+  if(doi){const res=await fetch("https://api.crossref.org/works/"+encodeURIComponent(doi));if(res.status===404)return{items:[]};if(!res.ok)throw new Error("HTTP "+res.status);items=[(await res.json()).message]}
+  else{const res=await fetch("https://api.crossref.org/works?query.bibliographic="+encodeURIComponent(r.slice(0,300))+"&rows=3&select=DOI,title,issued,author,container-title");if(!res.ok)throw new Error("HTTP "+res.status);items=(await res.json()).message.items||[]}
+  return{items:items.map(m=>({doi:m.DOI||"",title:(m.title&&m.title[0])||"",year:m.issued&&m.issued["date-parts"]&&m.issued["date-parts"][0]&&m.issued["date-parts"][0][0]||null}))}
+}
+$("runCr").onclick=async()=>{
+  if(!CIT||!CIT.refs.length){$("cstat").textContent="Jalankan Periksa sitasi dulu.";return}
+  const refs=CIT.refs.slice(0,60);$("runCr").disabled=true;$("crc").classList.remove("hid");$("crl").innerHTML="";
+  for(let i=0;i<refs.length;i++){
+    $("cstat").textContent="Memeriksa Crossref "+(i+1)+"/"+refs.length+"...";
+    const r=refs[i],doi=((r.match(/10\.\d{4,9}\/[^\s"<>]+/)||[])[0]||"").replace(/[.,;)\]]+$/,"");
+    let html;
+    try{
+      const j=await crQ(doi,r);
+      const it=(j.items||[])[0];
+      if(!it)html=`<span class="tag" style="color:var(--bad)">tidak ditemukan</span>`;
+      else{
+        const tt=toks(it.title||""),rt=new Set(toks(r)),ov=tt.length?tt.filter(w=>rt.has(w)).length/tt.length:0;
+        const yr=it.year&&!new RegExp("\\b"+it.year+"\\b").test(r);
+        const st=doi?["var(--ok)","DOI valid"]:ov>=.7?["var(--ok)","ditemukan"]:ov>=.45?["var(--wn)","mirip, periksa manual"]:["var(--bad)","tidak cocok"];
+        html=`<span class="tag" style="color:${st[0]}">${st[1]}</span> <span class="mut">${esc(it.title||"")} ${it.year?"("+it.year+")":""}${yr?" · tahun di referensi berbeda":""}${it.doi?` · <a href="https://doi.org/${encodeURIComponent(it.doi).replace(/%2F/g,"/")}" target="_blank" rel="noopener">${esc(it.doi)}</a>`:""}</span>`;
+      }
+    }catch(e){html=`<span class="tag" style="color:var(--wn)">gagal diperiksa</span> <span class="mut">${esc(e.message)}</span>`}
+    $("crl").insertAdjacentHTML("beforeend",`<div class="item">${esc(r)}<div style="margin-top:4px">${html}</div></div>`);
+    await new Promise(z=>setTimeout(z,150));
+  }
+  $("cstat").textContent="Validasi Crossref selesai"+(CIT.refs.length>60?" (60 entri pertama)":"")+". Hasil 'mirip' dan 'tidak ditemukan' perlu dicek manual; tidak semua sumber punya DOI.";
+  $("runCr").disabled=false;
+};
+
+/* ===== Pembanding ===== */
+$("cFromDoc").onclick=()=>{$("cA").value=$("txt").value};
+$("cFromPar").onclick=()=>{$("cB").value=$("pout").value};
+$("runCmp").onclick=()=>{
+  const a=$("cA").value.trim(),b=$("cB").value.trim();
+  if(!a||!b){$("cmpS").textContent="Isi kedua versi.";return}
+  const pa=a.split(/\n{2,}/).map(s=>s.trim()).filter(Boolean),pb=b.split(/\n{2,}/).map(s=>s.trim()).filter(Boolean);
+  const n=Math.max(pa.length,pb.length);let same=0,tot=0,rows=[];
+  for(let i=0;i<n;i++){
+    const x=pa[i]||"",y=pb[i]||"",d=diffPair(x,y);same+=d.same;tot+=d.tot;
+    rows.push(`<div class="grid2"><div class="cell">${d.l}</div><div class="cell">${d.r}</div></div>`);
+  }
+  const sc=t=>{const q=paragraphs(t).filter(p=>p!==MARK);return q.length?cal(Math.round(q.map(heur2).reduce((u,v)=>u+v,0)/q.length)):null};
+  const sa=sc(a),sb=sc(b),sim=simil(a,b);
+  const k=(v,t,c)=>`<div><b style="${c?"color:"+c:""}">${v}</b><span class="mut">${t}</span></div>`;
+  $("cmpk").innerHTML=k(tot?Math.round(100*same/tot)+"%":"–","kata tidak berubah")+k(sim+"%","kemiripan frasa (3 kata)")+(sa!=null?k(sa+"%","skor AI lokal asli",col(sa)):"")+(sb!=null?k(sb+"%","skor AI lokal revisi",col(sb)):"");
+  $("cmpd").innerHTML=rows.join("");$("cmpc").classList.remove("hid");
+  $("cmpS").textContent=(pa.length!==pb.length?"Jumlah paragraf berbeda ("+pa.length+" vs "+pb.length+"); paragraf dipasangkan berdasarkan urutan. ":"")+"Skor lokal hanya statistik, tanpa AI. Untuk skor penuh, jalankan Detektor pada tiap versi dan lihat riwayat di bawah.";
+};
+
+/* ===== Uji tolok ukur ===== */
+let BEN=null;
+const cnt=()=>{$("nH").textContent=splitSamples($("bH").value).length;$("nA").textContent=splitSamples($("bA").value).length};
+$("bH").oninput=cnt;$("bA").oninput=cnt;
+$("benCancel").onclick=()=>{CANCEL=true};
+$("runBen").onclick=async()=>{
+  const H=splitSamples($("bH").value),A=splitSamples($("bA").value),useAI=$("benAI").checked&&!!sample;
+  if(H.length<3||A.length<3){$("benS").textContent="Isi minimal 3 teks untuk masing-masing kelompok (disarankan 20 sampai 30).";return}
+  CANCEL=false;$("runBen").disabled=true;$("benCancel").hidden=false;$("benp").hidden=false;
+  const all=[...H.map(t=>[t,0]),...A.map(t=>[t,1])],sc=[[],[]];
+  for(let i=0;i<all.length&&!CANCEL;i++){
+    $("benbar").style.width=Math.round(100*i/all.length)+"%";$("benS").textContent="Menilai teks "+(i+1)+" dari "+all.length+"...";
+    sc[all[i][1]].push(await rawScore(all[i][0],useAI));
+  }
+  $("runBen").disabled=false;$("benCancel").hidden=true;$("benp").hidden=true;
+  if(sc[0].length<2||sc[1].length<2){$("benS").textContent="Dibatalkan sebelum cukup data.";return}
+  const m=metrics(sc[0],sc[1]);BEN={H:sc[0],A:sc[1],m,H0:H,A0:A,useAI};
+  const pc=v=>Math.round(v*100)+"%",mean=a=>a.reduce((x,y)=>x+y,0)/a.length;
+  $("benk").innerHTML=`<div><b>${m.auc.toFixed(2)}</b><span class="mut">AUC (1.00 sempurna, 0.50 acak)</span></div><div><b>${m.best.t}</b><span class="mut">ambang terbaik</span></div><div><b>${pc(1-m.best.fpr)} / ${pc(1-m.best.fnr)}</b><span class="mut">manusia benar / AI terdeteksi</span></div><div><b>${sc[0].length} + ${sc[1].length}</b><span class="mut">teks manusia + AI</span></div>`;
+  const dots=(arr,c)=>arr.map(v=>`<i style="left:${v}%;background:${c}" title="${v}"></i>`).join("");
+  $("stH").innerHTML=dots(sc[0],"var(--ok)");$("stA").innerHTML=dots(sc[1],"var(--bad)");
+  const row=(t,r)=>`<tr><td>${t}</td><td>${pc(r.fpr)}</td><td>${pc(r.fnr)}</td><td>${pc(1-(r.fpr+r.fnr)/2)}</td></tr>`;
+  $("benT").innerHTML=[40,50,70].map(t=>row("≥ "+t,m.at(t))).join("")+row("≥ "+m.best.t+" (terbaik)",m.best);
+  const sep=mean(sc[1])-mean(sc[0]);
+  $("benA").textContent=sep<10?"Rata-rata skor AI hanya "+Math.round(sep)+" poin di atas manusia; kalibrasi tidak diterapkan karena terlalu dekat.":"Rata-rata skor: manusia "+Math.round(mean(sc[0]))+", AI "+Math.round(mean(sc[1]))+".";
+  $("benApply").disabled=sep<10;
+  $("benc").classList.remove("hid");
+  $("benS").textContent=(CANCEL?"Dibatalkan, memakai data yang sudah dinilai. ":"Selesai. ")+(useAI?"Skor memakai AI + statistik.":"Skor memakai statistik lokal saja.")+" Dengan data sedikit, angka ini kasar.";
+};
+$("benApply").onclick=()=>{
+  if(!BEN)return;const mean=a=>a.reduce((x,y)=>x+y,0)/a.length,sh=mean(BEN.H),sa=mean(BEN.A);
+  if(sa-sh<10)return;fitCal(sh,sa);$("benA").textContent="Kalibrasi tersimpan dari "+(BEN.H.length+BEN.A.length)+" teks (manusia "+Math.round(sh)+", AI "+Math.round(sa)+").";
+};
+$("benCsv").onclick=()=>{
+  if(!BEN)return;const q=s=>'"'+s.replace(/"/g,'""').replace(/\s+/g," ").slice(0,80)+'"';
+  const rows=["kelompok,skor,awal_teks",...BEN.H.map((v,i)=>"manusia,"+v+","+q(BEN.H0[i])),...BEN.A.map((v,i)=>"ai,"+v+","+q(BEN.A0[i]))];
+  saveFile("uji-akurasi.csv",new Blob(["﻿"+rows.join("\n")],{type:"text/csv"}),"benS");
+};
+</script>
+<script>
+/* ===== Daftar Dokumen (CRUD, localStorage) ===== */
+(function(){
+  const KEY="docs",q=id=>document.getElementById(id);
+  const get=()=>{try{return JSON.parse(localStorage.getItem(KEY))||[]}catch{return[]}};
+  const put=a=>{try{localStorage.setItem(KEY,JSON.stringify(a))}catch(e){alert("Penyimpanan browser penuh atau diblokir.")}render()};
+  const wc=t=>(String(t).trim().match(/\S+/g)||[]).length;
+  const E=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  let editId=null;
+  function render(){
+    const a=get().sort((x,y)=>y.t-x.t);
+    q("dEmpty").hidden=a.length>0;
+    q("dBody").innerHTML=a.map(d=>`<tr data-id="${d.id}"><td><b>${E(d.title)}</b></td><td>${wc(d.text)}</td><td class="mut">${new Date(d.t).toLocaleString("id-ID",{dateStyle:"medium",timeStyle:"short"})}</td><td><div class="act"><button class="g" data-a="open">Buka</button><button class="g" data-a="edit">Edit</button><button class="g dng" data-a="del">Hapus</button></div></td></tr>`).join("");
+  }
+  function openDlg(d){editId=d?d.id:null;q("dDT").textContent=d?"Edit dokumen":"Tambah dokumen";q("dTi").value=d?d.title:"";q("dTx").value=d?d.text:"";q("dDlg").showModal()}
+  q("dAdd").onclick=()=>openDlg(null);
+  q("dCancel").onclick=()=>q("dDlg").close();
+  q("dSave").onclick=()=>{
+    const title=q("dTi").value.trim()||"Tanpa judul",text=q("dTx").value,a=get();
+    if(editId){const d=a.find(x=>x.id===editId);if(d){d.title=title;d.text=text;d.t=Date.now()}}
+    else a.push({id:"d"+Date.now().toString(36),title,text,t:Date.now()});
+    q("dDlg").close();put(a);
+  };
+  q("dBody").onclick=e=>{
+    const b=e.target.closest("button");if(!b)return;
+    const id=b.closest("tr").dataset.id,a=get(),d=a.find(x=>x.id===id);if(!d)return;
+    if(b.dataset.a==="edit")openDlg(d);
+    else if(b.dataset.a==="del"){if(confirm('Hapus "'+d.title+'"?'))put(a.filter(x=>x.id!==id))}
+    else{q("txt").value=d.text;q("txt").oninput();show("doc")}
+  };
+  q("dKeep").onclick=()=>{
+    const text=q("txt").value;if(!text.trim())return;
+    const title=prompt("Judul dokumen:","Dokumen "+new Date().toLocaleDateString("id-ID"));if(title===null)return;
+    const a=get();a.push({id:"d"+Date.now().toString(36),title:title.trim()||"Tanpa judul",text,t:Date.now()});put(a);
+  };
+  document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>show(b.dataset.go));
+  render();
+})();
+</script>
+
+<script>
+/* ===== Koneksi Claude di luar claude.ai ===== */
+(function(){
+  const K="aiCfg",q=id=>document.getElementById(id);
+  const cfg=()=>{try{return JSON.parse(localStorage.getItem(K))||{}}catch{return{}}};
+  function make(){
+    const c=cfg(),px=c.mode==="proxy"&&/^https:\/\//.test(c.proxy||""),ky=c.mode==="key"&&!!c.key;
+    if(!px&&!ky)return null;
+    const model=c.model||"claude-haiku-5-5";
+    async function call(content){
+      const h={"content-type":"application/json"};let url=c.proxy;
+      if(ky){url="https://api.anthropic.com/v1/messages";h["x-api-key"]=c.key;h["anthropic-version"]="2023-06-01";h["anthropic-dangerous-direct-browser-access"]="true"}
+      const r=await fetch(url,{method:"POST",headers:h,body:JSON.stringify({model,max_tokens:6000,messages:[{role:"user",content}]})});
+      const j=await r.json().catch(()=>({}));
+      if(!r.ok)throw new Error((j.error&&(j.error.message||j.error))||"HTTP "+r.status);
+      return(j.content||[]).map(x=>x.text||"").join("");
+    }
+    const b64=b=>new Promise((ok,no)=>{const f=new FileReader();f.onload=()=>ok(String(f.result).split(",")[1]);f.onerror=()=>no(new Error("Gagal membaca gambar"));f.readAsDataURL(b)});
+    const s=async(p,o)=>{o=o||{};let content=p;
+      if(o.images&&o.images.length){content=[];for(const im of o.images)content.push({type:"image",source:{type:"base64",media_type:im.type||"image/jpeg",data:await b64(im)}});content.push({type:"text",text:p})}
+      return{text:await call(content)}};
+    s.json=async p=>{const t=await call(p),m=t.replace(/```json|```/g,"").match(/\{[\s\S]*\}/);if(!m)throw new Error("Respons bukan JSON");return JSON.parse(m[0])};
+    s.limits=async()=>({images:true});
+    return s;
+  }
+  const native=!!(C&&C.use);
+  const apply=()=>{if(!native)sample=make()};
+  function ui(){
+    const c=cfg();q("aiMode").value=c.mode||"off";q("aiKey").value=c.key||"";q("aiPx").value=c.proxy||"";q("aiModel").value=c.model||"claude-haiku-5-5";
+    q("aiKeyBox").hidden=q("aiMode").value!=="key";q("aiPxBox").hidden=q("aiMode").value!=="proxy";
+    if(native){q("aiS").textContent="Di claude.ai, koneksi Claude sudah otomatis.";}
+  }
+  q("aiMode").onchange=()=>{q("aiKeyBox").hidden=q("aiMode").value!=="key";q("aiPxBox").hidden=q("aiMode").value!=="proxy"};
+  q("aiSave").onclick=()=>{
+    const c={mode:q("aiMode").value,key:q("aiKey").value.trim(),proxy:q("aiPx").value.trim().replace(/\/+$/,""),model:q("aiModel").value};
+    try{localStorage.setItem(K,JSON.stringify(c))}catch{q("aiS").textContent="Penyimpanan browser diblokir.";return}
+    apply();q("aiS").textContent=sample||native?"Tersimpan. Klik Tes koneksi untuk memastikan.":"Tersimpan, tapi pengaturan belum lengkap.";
+  };
+  q("aiTest").onclick=async()=>{
+    if(!native)apply();
+    if(!sample){q("aiS").textContent="Isi dan simpan pengaturan dulu.";return}
+    q("aiS").textContent="Menguji...";
+    try{const r=await sample("Balas dengan satu kata saja: OK");q("aiS").textContent="Terhubung. Balasan: "+(r.text||"").trim().slice(0,40)}
+    catch(e){q("aiS").textContent="Gagal: "+e.message}
+  };
+  q("aiClear").onclick=()=>{try{localStorage.removeItem(K)}catch{}if(!native)sample=null;ui();q("aiS").textContent="Pengaturan dihapus."};
+  ui();apply();
+})();
+</script>
+</body>
+</html>
